@@ -10,11 +10,14 @@ export function RouteErrorElement() {
     hasNoRouteError || (isRouteErrorResponse(error) && error.status === 404);
 
   const title = isNotFound ? t('notFound.title') : t('errors.unexpectedTitle');
-  const description = isNotFound
-    ? t('notFound.description')
-    : error instanceof Error
-      ? error.message
-      : t('errors.unexpectedMessage');
+
+  function getDescription(): string {
+    if (isNotFound) return t('notFound.description');
+    if (error instanceof Error) return error.message;
+    return t('errors.unexpectedMessage');
+  }
+
+  const description = getDescription();
 
   return (
     <main

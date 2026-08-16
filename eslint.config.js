@@ -46,6 +46,9 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      // Prefer a function with early returns; a nested ternary hides which
+      // branch you are in, especially inside JSX.
+      'no-nested-ternary': 'error',
       'jsx-a11y/tabindex-no-positive': 'error',
       'jsx-a11y/no-autofocus': 'error',
     },

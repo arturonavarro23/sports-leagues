@@ -67,6 +67,55 @@ export default function LeaguesPage({ headerActions }: LeaguesPageProps) {
     !leaguesQuery.isError &&
     filteredLeagues.length === 0;
 
+  function renderResults() {
+    if (leaguesQuery.isError) {
+      return (
+        <ErrorState
+          headingLevel={2}
+          title={t('leagues.error.title')}
+          description={t('leagues.error.description')}
+          action={
+            <Button onClick={() => void leaguesQuery.refetch()}>
+              {t('leagues.tryAgain')}
+            </Button>
+          }
+        />
+      );
+    }
+
+    if (hasNoResults) {
+      return (
+        <EmptyState
+          headingLevel={2}
+          title={t('leagues.empty.title')}
+          description={t('leagues.empty.description')}
+        />
+      );
+    }
+
+    return (
+      <LeagueGrid
+        leagues={filteredLeagues}
+        selectedLeagueId={selectedLeagueId}
+        onSelectLeague={selectLeague}
+        isLoading={leaguesQuery.isPending}
+        viewMode={viewMode}
+        renderBadge={(league) => {
+          if (league.id !== selectedLeague?.id) return null;
+
+          return (
+            <SeasonBadgeImage
+              leagueName={league.name}
+              badge={badgeQuery.data ?? null}
+              isLoading={badgeQuery.isFetching}
+              isError={badgeQuery.isError}
+            />
+          );
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-dvh">
       <header className="border-border-subtle bg-surface-sunken border-b">
@@ -104,44 +153,7 @@ export default function LeaguesPage({ headerActions }: LeaguesPageProps) {
           }
         />
 
-        <div className="mt-6">
-          {leaguesQuery.isError ? (
-            <ErrorState
-              headingLevel={2}
-              title={t('leagues.error.title')}
-              description={t('leagues.error.description')}
-              action={
-                <Button onClick={() => void leaguesQuery.refetch()}>
-                  {t('leagues.tryAgain')}
-                </Button>
-              }
-            />
-          ) : hasNoResults ? (
-            <EmptyState
-              headingLevel={2}
-              title={t('leagues.empty.title')}
-              description={t('leagues.empty.description')}
-            />
-          ) : (
-            <LeagueGrid
-              leagues={filteredLeagues}
-              selectedLeagueId={selectedLeagueId}
-              onSelectLeague={selectLeague}
-              isLoading={leaguesQuery.isPending}
-              viewMode={viewMode}
-              renderBadge={(league) =>
-                league.id === selectedLeague?.id ? (
-                  <SeasonBadgeImage
-                    leagueName={league.name}
-                    badge={badgeQuery.data ?? null}
-                    isLoading={badgeQuery.isFetching}
-                    isError={badgeQuery.isError}
-                  />
-                ) : null
-              }
-            />
-          )}
-        </div>
+        <div className="mt-6">{renderResults()}</div>
       </main>
     </div>
   );

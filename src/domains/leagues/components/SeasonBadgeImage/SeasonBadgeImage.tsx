@@ -15,6 +15,51 @@ export function SeasonBadgeImage({
 }: SeasonBadgeImageProps) {
   const { t } = useTranslation();
 
+  function renderBadgeContent() {
+    if (isLoading) {
+      return (
+        <Skeleton
+          width={BADGE_DIMENSIONS.width}
+          height={BADGE_DIMENSIONS.height}
+          radius="card"
+        />
+      );
+    }
+
+    if (isError) {
+      return (
+        <div className="text-content-secondary flex flex-col items-center gap-1 text-center text-xs">
+          <ShieldIcon />
+          <span>{t('leagues.badge.error')}</span>
+        </div>
+      );
+    }
+
+    if (badge === null) {
+      return (
+        <div className="text-content-muted flex flex-col items-center gap-1">
+          <ShieldIcon />
+          <span className="text-center text-xs">
+            {t('leagues.badge.missing')}
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={badge.badgeUrl}
+        alt={t('leagues.badge.alt', {
+          league: leagueName,
+          season: badge.season,
+        })}
+        width={BADGE_DIMENSIONS.width}
+        height={BADGE_DIMENSIONS.height}
+        className="h-full w-full object-contain"
+      />
+    );
+  }
+
   return (
     <div
       aria-busy={isLoading || undefined}
@@ -25,36 +70,7 @@ export function SeasonBadgeImage({
         aspectRatio: BADGE_ASPECT_RATIO,
       }}
     >
-      {isLoading ? (
-        <Skeleton
-          width={BADGE_DIMENSIONS.width}
-          height={BADGE_DIMENSIONS.height}
-          radius="card"
-        />
-      ) : isError ? (
-        <div className="text-content-secondary flex flex-col items-center gap-1 text-center text-xs">
-          <ShieldIcon />
-          <span>{t('leagues.badge.error')}</span>
-        </div>
-      ) : badge === null ? (
-        <div className="text-content-muted flex flex-col items-center gap-1">
-          <ShieldIcon />
-          <span className="text-center text-xs">
-            {t('leagues.badge.missing')}
-          </span>
-        </div>
-      ) : (
-        <img
-          src={badge.badgeUrl}
-          alt={t('leagues.badge.alt', {
-            league: leagueName,
-            season: badge.season,
-          })}
-          width={BADGE_DIMENSIONS.width}
-          height={BADGE_DIMENSIONS.height}
-          className="h-full w-full object-contain"
-        />
-      )}
+      {renderBadgeContent()}
     </div>
   );
 }

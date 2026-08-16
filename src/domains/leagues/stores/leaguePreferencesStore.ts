@@ -6,6 +6,7 @@ import {
 } from '@/shared/storage/safeLocalStorage';
 import {
   DARK_COLOR_SCHEME_QUERY,
+  isThemePreference,
   resolveInitialThemePreference,
   type ThemePreference,
 } from '@/shared/theme/themeTypes';
@@ -15,17 +16,13 @@ export type ViewMode = 'grid' | 'list';
 export const DEFAULT_VIEW_MODE: ViewMode = 'grid';
 
 function readInitialThemePreference(): ThemePreference {
-  const stored = readStoredValue(STORAGE_KEYS.theme, isStoredThemeValue);
+  const stored = readStoredValue(STORAGE_KEYS.theme, isThemePreference);
   const prefersDark =
     typeof window !== 'undefined' &&
     typeof window.matchMedia === 'function' &&
     window.matchMedia(DARK_COLOR_SCHEME_QUERY).matches;
 
   return resolveInitialThemePreference(stored, prefersDark);
-}
-
-function isStoredThemeValue(value: string): value is string {
-  return typeof value === 'string';
 }
 
 interface LeaguePreferencesState {

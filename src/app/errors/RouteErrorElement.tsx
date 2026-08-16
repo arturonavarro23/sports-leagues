@@ -1,37 +1,35 @@
-import { Link, isRouteErrorResponse, useRouteError } from 'react-router';
+import { isRouteErrorResponse, useRouteError } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { ROUTE_PATHS } from '@/shared/constants/routes';
+import { RouteMessage } from '@/app/errors/RouteMessage';
 
+// Only ever reached when something actually threw: a loader rejecting, or a
+// render failing. A 404 thrown by a loader is a missing resource, anything
+// else is a fault, and the two are reported differently.
 export function RouteErrorElement() {
   const { t } = useTranslation();
   const error = useRouteError();
-  const hasNoRouteError = error === null || error === undefined;
-  const isNotFound =
-    hasNoRouteError || (isRouteErrorResponse(error) && error.status === 404);
 
-  const title = isNotFound ? t('notFound.title') : t('errors.unexpectedTitle');
+  if (isRouteErrorResponse(error) && error.status === 404) {
+    return (
+      <RouteMessage
+        title={t('notFound.title')}
+        description={t('notFound.description')}
+      />
+    );
+  }
 
   function getDescription(): string {
-    if (isNotFound) return t('notFound.description');
+    if (isRouteErrorResponse(error))
+      return error.statusText || String(error.status);
     if (error instanceof Error) return error.message;
     return t('errors.unexpectedMessage');
   }
 
-  const description = getDescription();
-
   return (
-    <main
-      id="main-content"
-      className="flex min-h-screen flex-col items-center justify-center p-8"
-    >
-      <div
-        role="alert"
-        className="flex flex-col items-center gap-4 text-center"
-      >
-        <h1>{title}</h1>
-        <p>{description}</p>
-        <Link to={ROUTE_PATHS.leagues}>{t('notFound.backToLeagues')}</Link>
-      </div>
-    </main>
+    <RouteMessage
+      isAlert
+      title={t('errors.unexpectedTitle')}
+      description={getDescription()}
+    />
   );
 }

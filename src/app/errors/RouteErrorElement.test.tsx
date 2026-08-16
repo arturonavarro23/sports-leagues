@@ -6,21 +6,31 @@ import { ROUTE_PATHS } from '@/shared/constants/routes';
 import { RouteErrorElement } from './RouteErrorElement';
 
 describe('RouteErrorElement', () => {
-  it('renders a not-found message when there is no thrown route error', () => {
+  it('reports a 404 thrown by a loader as a missing page, not a failure', () => {
     const router = createMemoryRouter(
-      [{ path: '*', element: <RouteErrorElement /> }],
-      { initialEntries: ['/unknown-path'] },
+      [
+        {
+          path: '/gone',
+          loader: () => {
+            throw new Response(null, { status: 404 });
+          },
+          element: <div />,
+          errorElement: <RouteErrorElement />,
+        },
+      ],
+      { initialEntries: ['/gone'] },
     );
 
     render(<RouterProvider router={router} />);
 
-    expect(screen.getByRole('alert')).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: /page not found/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: /back to leagues/i }),
-    ).toHaveAttribute('href', ROUTE_PATHS.leagues);
+    return screen
+      .findByRole('heading', { name: /page not found/i })
+      .then(() => {
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+        expect(
+          screen.getByRole('link', { name: /back to leagues/i }),
+        ).toHaveAttribute('href', ROUTE_PATHS.leagues);
+      });
   });
 
   it('renders an unexpected-error message for a thrown route error', () => {

@@ -34,7 +34,8 @@ describe('routeConfig', () => {
     expect(
       await screen.findByRole('heading', { name: /page not found/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('alert')).toBeInTheDocument();
+    // An unknown URL is not a failure, so it must not be announced as one.
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('redirects the bare /leagues path to a locale-prefixed route', async () => {

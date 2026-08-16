@@ -32,9 +32,12 @@ describe('locale routing', () => {
     await i18next.changeLanguage(DEFAULT_LOCALE);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.restoreAllMocks();
     window.localStorage.clear();
+    // Awaited so any changeLanguage the unmounted route left in flight settles
+    // before the next test renders.
+    await i18next.changeLanguage(DEFAULT_LOCALE);
   });
 
   it('activates English at /en/leagues', async () => {
@@ -48,7 +51,7 @@ describe('locale routing', () => {
   it('activates Spanish at /es/leagues', async () => {
     renderRouter(['/es/leagues']);
 
-    await screen.findByRole('heading', { name: 'Sports Leagues' });
+    await screen.findByRole('heading', { name: 'Ligas Deportivas' });
     expect(i18next.language).toBe('es');
     expect(document.documentElement.lang).toBe('es');
   });
@@ -151,5 +154,41 @@ describe('locale routing', () => {
       await screen.findByRole('heading', { name: 'Ligas Deportivas' });
       expect(router.state.location.pathname).toBe('/es/leagues');
     });
+  });
+});
+
+describe('locale root without a segment', () => {
+  beforeEach(async () => {
+    await i18next.changeLanguage(DEFAULT_LOCALE);
+  });
+
+  it('completes /es to /es/leagues', async () => {
+    const router = renderRouter(['/es']);
+
+    await screen.findByRole('heading', { name: 'Ligas Deportivas' });
+    expect(router.state.location.pathname).toBe('/es/leagues');
+  });
+
+  it('completes /en to /en/leagues', async () => {
+    const router = renderRouter(['/en']);
+
+    await screen.findByRole('heading', { name: 'Sports Leagues' });
+    expect(router.state.location.pathname).toBe('/en/leagues');
+  });
+
+  it('preserves the query string while completing the path', async () => {
+    const router = renderRouter(['/es?search=premier&league=4328']);
+
+    await screen.findByRole('heading', { name: 'Ligas Deportivas' });
+    expect(router.state.location.pathname).toBe('/es/leagues');
+    expect(router.state.location.search).toBe('?search=premier&league=4328');
+  });
+
+  it('keeps an unsupported locale root a not-found route', async () => {
+    renderRouter(['/fr']);
+
+    expect(
+      await screen.findByRole('heading', { name: /page not found/i }),
+    ).toBeInTheDocument();
   });
 });

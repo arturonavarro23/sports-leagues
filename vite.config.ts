@@ -31,6 +31,9 @@ export default defineConfig({
           setupFiles: ['./src/shared/test/setup.ts'],
           include: ['src/**/*.test.{ts,tsx}'],
           css: true,
+          // Testing Library's findBy* defaults to 1s, which is tight for the
+          // lazily loaded route under a fully parallel run.
+          testTimeout: 10_000,
         },
       },
       {

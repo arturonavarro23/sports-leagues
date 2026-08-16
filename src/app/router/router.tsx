@@ -5,6 +5,7 @@ import { RouteErrorElement } from '@/app/errors/RouteErrorElement';
 import { RootRedirect } from '@/app/router/RootRedirect';
 import { LocaleLeaguesRoute } from '@/app/router/LocaleLeaguesRoute';
 import { localeLeaguesLoader } from '@/app/router/localeLeaguesLoader';
+import { LeaguesRoute } from '@/app/router/LeaguesRoute';
 
 export const routeConfig: RouteObject[] = [
   {
@@ -22,6 +23,7 @@ export const routeConfig: RouteObject[] = [
     element: <LocaleLeaguesRoute />,
     loader: localeLeaguesLoader,
     errorElement: <RouteErrorElement />,
+    children: [{ index: true, element: <LeaguesRoute /> }],
   },
   {
     path: '*',
